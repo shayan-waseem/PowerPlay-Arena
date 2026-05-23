@@ -8,10 +8,10 @@ import GanttChart from '../components/gantt/GanttChart';
 import QueueVisualizer from '../components/scheduler/QueueVisualizer';
 
 // Import frontend fallback algorithms to guarantee 100% client-side operations under any network state!
-import simulateFCFS from '../../server/simulators/fcfs';
-import simulateSJF from '../../server/simulators/sjf';
-import simulatePriority from '../../server/simulators/priority';
-import simulateRoundRobin from '../../server/simulators/roundRobin';
+import simulateFCFS from "../simulators/fcfs.js";
+import simulateSJF from "../simulators/sjf.js";
+import simulatePriority from "../simulators/priority.js";
+import simulateRoundRobin from "../simulators/roundRobin.js";
 
 const Simulation = () => {
   const { playClick, playSuccess, playScheduleTick, playCompleteTick } = useContext(ArenaContext);
@@ -86,7 +86,7 @@ const Simulation = () => {
 
     setProcesses(updated);
     toast.success(`PROCESS ${newPid} ADDED TO LABORATORY QUEUE`);
-    
+
     // Clear and suggest next pid
     setNewName('');
     setNewArrival(Math.max(...updated.map(p => p.arrivalTime)) + 2); // suggest next arrival time
@@ -262,7 +262,7 @@ const Simulation = () => {
 
   return (
     <div className="flex flex-col gap-6 py-2 select-none">
-      
+
       {/* HEADER SECTION */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-4 border-b border-darkBorder/40">
         <div className="flex items-center gap-3">
@@ -293,10 +293,10 @@ const Simulation = () => {
 
       {/* THREE LAYOUT COLUMNS */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
-        
+
         {/* COLUMN 1: PROCESS BUILDER FORM */}
         <div className="xl:col-span-1 flex flex-col gap-6">
-          
+
           {/* Builder card */}
           <Card className="flex flex-col gap-4 border border-darkBorder/60 bg-darkCard/35">
             <h4 className="font-display font-bold text-xs text-white tracking-wider uppercase border-b border-darkBorder/40 pb-2 flex items-center gap-2">
@@ -515,7 +515,7 @@ const Simulation = () => {
       {/* RESULTS DISPLAY: GANTT CHART, QUEUE TRANSITIONS, COMPILATIONS TABLES */}
       {results && (
         <div className="flex flex-col gap-6 animate-fadeIn mt-2">
-          
+
           {/* Gantt timeline */}
           <GanttChart ganttData={results.ganttData} />
 
@@ -535,14 +535,14 @@ const Simulation = () => {
 
           {/* Detailed metrics & stats */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
+
             {/* Table computations */}
             <Card className="lg:col-span-2 border border-darkBorder/60 bg-darkCard/35 flex flex-col gap-3">
               <div className="flex justify-between items-center pb-2 border-b border-darkBorder/40 mb-1">
                 <h4 className="font-display font-bold text-xs text-white tracking-wider uppercase">
                   MATHEMATICAL OS PROCESS COMPUTATIONS
                 </h4>
-                
+
                 {/* Save button */}
                 <button
                   onClick={handleSaveToDatabase}
@@ -595,7 +595,7 @@ const Simulation = () => {
                   <span className="font-display text-[9px] font-bold text-gray-500 uppercase tracking-widest">CPU CORE LOAD</span>
                   <span className="font-mono font-bold text-xs text-neonGreen text-glow-green">{results.cpuUtilization}%</span>
                 </div>
-                
+
                 <div className="flex justify-between items-center p-3 rounded-lg border border-darkBorder bg-darkBg">
                   <span className="font-display text-[9px] font-bold text-gray-500 uppercase tracking-widest">AVERAGE WAIT TIME</span>
                   <span className="font-mono font-bold text-xs text-neonBlue text-glow-blue">{results.averageWaitingTime}s</span>
