@@ -1,137 +1,146 @@
-# Implementation Plan - Power Play Arena
+# 🎮 PowerPlay Arena: Cyberpunk OS Scheduling Simulator
 
-Power Play Arena is a full-stack localhost web application that simulates Operating System Scheduling Algorithms (FCFS, SJF, Priority, Round Robin) by mapping them to an interactive entertainment arena theme.
+PowerPlay Arena is a fully responsive, full-stack web application that translates core Operating System CPU Scheduling Algorithms into a futuristic, gamified amusement arena simulator. 
 
-- **Processes** = Visitors
-- **CPU** = Entertainment Resources (Gaming PCs, Bowling lanes, Trampolines, VR gear)
-- **Ready Queue** = Waiting Lines
-- **Execution** = Activity Sessions
-- **Terminated Processes** = Completed Activities
-
-The simulator will feature a highly immersive, futuristic, dark gaming aesthetic with glowing neon elements, fully responsive layout, robust analytics, and a secure authentication system (with a hidden admin route).
+By mapping abstract OS concepts to real-world gaming and entertainment arena activities, this project serves as a highly visual, interactive learning tool designed for computer science presentations and coursework.
 
 ---
 
-## User Review Required
+## 🌌 Thematic Mapping: OS to Arena
 
-> [!IMPORTANT]
-> - **Default Admin Account**: An initial admin account will be seeded automatically (`admin@powerplay.com` / `admin123`) to allow access to the hidden admin panel (`/powerplay-secret-admin`).
-> - **MongoDB Requirements**: You will need a running MongoDB server (either local `mongodb://localhost:27017/powerplay` or a MongoDB Atlas URI) defined in the `.env` file.
-> - **Sound Toggle**: An optional sci-fi synthesizer audio chime will be played when a process is "scheduled" or "completed" if the sound toggle is active.
+We map standard operating system scheduling terminology directly to the operations of an amusement arena:
+
+| OS Concept | PowerPlay Arena Metaphor | Description |
+| :--- | :--- | :--- |
+| **Processes** | 🎟️ **Visitors** | Individual clients seeking entry or session time. |
+| **CPU / Core** | 🕹️ **Activity Zone** | Gaming PCs, VR bays, Bowling lanes, or Trampolines. |
+| **Ready Queue** | 👥 **Waiting Lines** | Orderly queues of visitors waiting for their zone session. |
+| **Execution** | ⏱️ **Active Session** | The visitor utilizing the activity resource. |
+| **Burst Time** | ⏳ **Session Duration** | The time required for a visitor to finish their game/ride. |
+| **Priority** | 👑 **Ticket Tier** | Regular, VIP, or VVIP priority level credentials. |
+| **Terminated** | 🏁 **Activity Complete** | Visitors who have finished all scheduled sessions. |
 
 ---
 
-## Proposed Folder Structure & Components
+## ⚡ The Scheduling Algorithms
 
-We will organize the project in a single repository with `client` and `server` folders, enabling clean separations.
+The application implements four major CPU scheduling algorithms in pure JavaScript, working seamlessly on both the frontend simulation canvas and persisted via database collections on the backend:
+
+1. **First-Come-First-Served (FCFS)**
+   - Non-preemptive allocation based entirely on arrival time.
+   - Mimics simple walk-in waiting line queues.
+2. **Shortest Job First (SJF)**
+   - Supports both **Preemptive (SRTF)** and **Non-Preemptive** execution modes.
+   - Evaluates remaining burst (session) durations to minimize total waiting times.
+3. **Priority Scheduling**
+   - Supports both **Preemptive** and **Non-Preemptive** execution modes.
+   - Custom toggles support both ascending priority logic (1 = Highest) and descending logic.
+4. **Round Robin (RR)**
+   - Preemptive time-sliced resource allocation using a custom **Time Quantum** duration slider.
+   - Perfect for rotation pools, ensuring fair play across activities.
+
+### Calculated Process Metrics
+For every simulation run, the engine automatically calculates standard scheduling equations:
+* **Completion Time ($C_T$)**
+* **Turnaround Time ($T_{AT} = C_T - A_T$)**
+* **Waiting Time ($W_T = T_{AT} - B_T$)**
+* **Averages & Efficiency**: Average Waiting Time, Average Turnaround Time, and overall CPU utilization percentages.
+
+---
+
+## 🚀 Key Visual & Functional Zones
+
+* **🎮 Interactive Simulation Lab**: Customize processes on-the-fly (name, arrival time, burst time, priority), run playback simulations, adjust timing speeds, and watch queues move visually in real time.
+* **📈 Rich Comparative Analytics**: Interactive charts powered by `recharts` mapping FCFS, SJF, Priority, and Round Robin against each other to instantly compare average waiting times and efficiency metrics.
+* **🛎️ Reception Department**: Ticketing counters simulating FCFS / Priority / RR algorithms.
+* **🎪 Specialty Activity zones**: Kids Trampolines (Priority / RR), Esports Lanes (SJF / Priority), and VR centers.
+* **👤 User Profile System**: Secure login and historical logs of visitor entries.
+* **🔒 The Hidden Admin Suite (`/powerplay-secret-admin`)**: A full audit log trail, booking controls, and user moderation panel.
+
+---
+
+## 🛠️ Technology Stack
+
+* **Frontend**: React 18, Vite, HSL-tailored Cyberpunk Styling, Framer Motion (premium micro-animations), Lucide React.
+* **Backend**: Node.js, Express, JSON Web Token (JWT) authorization, bcryptjs password hashing.
+* **Database**: MongoDB (Mongoose ODM).
+
+---
+
+## 📦 Project Structure
 
 ```
 power-play-arena/
-├── package.json                   # Root package.json to run client & server concurrently
-├── README.md                      # Detailed setup guide
-├── .env                           # Global Environment configurations
-├── server/
-│   ├── config/
-│   │   └── db.js                  # MongoDB connection
-│   ├── models/
-│   │   ├── User.js                # Name, email, hashed password, role (user/admin)
-│   │   ├── Booking.js             # User bookings with queue status and allocation timings
-│   │   ├── Simulation.js          # Logs of executed simulations
-│   │   └── Log.js                 # Admin/system logs (for auditing)
-│   ├── controllers/
-│   │   ├── authController.js      # Register, Login, Current User
-│   │   ├── bookingController.js   # Manage reservations & department allocations
-│   │   ├── simulationController.js# Saved simulation sessions & stats
-│   │   └── adminController.js     # User management, booking moderation, system logs
-│   ├── middleware/
-│   │   └── authMiddleware.js      # JWT verifying & Admin role checks
-│   ├── simulators/
-│   │   ├── fcfs.js                # First-Come-First-Served logic
-│   │   ├── sjf.js                 # Shortest Job First logic (preemptive and non-preemptive)
-│   │   ├── priority.js            # Priority scheduling logic (preemptive and non-preemptive)
-│   │   └── roundRobin.js          # Round Robin logic (custom time quantum)
-│   ├── routes/
-│   │   ├── auth.js
-│   │   ├── bookings.js
-│   │   ├── simulations.js
-│   │   └── admin.js
-│   ├── utils/
-│   │   └── seed.js                # Seeding initial users, bookings, logs
-│   └── server.js                  # Express backend entrypoint
+├── package.json           # Root package running concurrent scripts
+├── .env                   # Global environment configuration
+├── cleanup.js             # Utility cleanup script
+├── server/                # Backend API Server
+│   ├── config/            # Mongoose / MongoDB connections
+│   ├── controllers/       # Auth, Admin, Booking & Simulation managers
+│   ├── middleware/        # JWT Authentication protectors
+│   ├── models/            # Database schemas (User, Booking, Simulation, Log)
+│   ├── routes/            # REST API endpoints
+│   ├── simulators/        # Pure JS implementation of FCFS, SJF, Priority, RR
+│   └── server.js          # Express server entry point
 │
-└── client/
-    ├── vite.config.js             # Client configuration with proxy setup
-    ├── tailwind.config.js         # Theme extensions (neon, glowing, font families)
+└── client/                # React Frontend application
+    ├── vite.config.js     # Dev server configuration with backend proxy
     ├── src/
-    │   ├── index.css              # Custom styling (scrollbars, neon glows, glassmorphism)
-    │   ├── main.jsx               # React entrypoint
-    │   ├── App.jsx                # Router, global Context providers
-    │   ├── context/
-    │   │   ├── AuthContext.jsx    # Authentication & User state
-    │   │   └── ArenaContext.jsx   # Global simulator configuration, live visitor generation, sound toggles
-    │   ├── components/
-    │   │   ├── navbar/Navbar.jsx  # Glassmorphism header with status, clock & sound controls
-    │   │   ├── sidebar/Sidebar.jsx# Neon glowing sidebar for admin & dashboard pages
-    │   │   ├── gantt/GanttChart.jsx# Full SVG-based or CSS-based timeline gantt chart
-    │   │   ├── scheduler/QueueVisualizer.jsx # Real-time process movement animations
-    │   │   └── ui/Card.jsx        # Premium cyberpunk panels
-    │   ├── pages/
-    │   │   ├── Home.jsx           # Dark thematic welcome, core OS-to-Arena map, live counters
-    │   │   ├── Login.jsx          # Cyberpunk credentials entry
-    │   │   ├── Signup.jsx         # Sign up as a regular visitor
-    │   │   ├── Dashboard.jsx      # Quick stats, interactive queue metrics
-    │   │   ├── Simulation.jsx     # Master simulation lab (add/edit processes, configure Gantt, live playback)
-    │   │   ├── Analytics.jsx      # Recharts comparison of FCFS vs SJF vs Priority vs RR
-    │   │   ├── Profile.jsx        # History of completed bookings (terminated processes)
-    │   │   ├── Reception.jsx      # Reception Simulator (FCFS / Priority / RR ticketing)
-    │   │   ├── KidsActivities.jsx # Kids VR/Trampoline (Priority / RR timer rotation)
-    │   │   ├── AdultActivities.jsx# Adult Arena (SJF / Priority esports lanes)
-    │   │   ├── GamingZone.jsx     # Gaming Cafe PC allocations (Queue switching CPU simulator)
-    │   │   ├── admin/
-    │   │   │   ├── AdminDashboard.jsx # Live server stats, logs preview
-    │   │   │   ├── ManageUsers.jsx   # View and delete registrations
-    │   │   │   ├── ManageBookings.jsx# Direct scheduling actions
-    │   │   │   └── SystemLogs.jsx    # Audit trails of mock arena server
-    │   │   └── NotFound.jsx
-    │   └── routes/
-    │       ├── AppRoutes.jsx      # Path matching & Layout wrappers
-    │       ├── ProtectedRoute.jsx # Route guarding for authenticated users
-    │       └── AdminRoute.jsx     # Hidden route guarding for the "/powerplay-secret-admin" route
+    │   ├── context/       # AuthState & Global Arena audio/theme Contexts
+    │   ├── components/    # Gantt Charts, Queue Visualizers, Glassmorphism UI
+    │   ├── pages/         # Dashboard, Simulation lab, Activity zones, Profile
+    │   │   └── admin/     # AdminDashboard, Audit log trails, User list
+    │   └── App.jsx        # Router assembly and Notification portals
 ```
 
 ---
 
-## Technical Implementations of Scheduling Algorithms
+## 🏁 Installation & Running Locally
 
-Each algorithm will be programmed in pure JS (both on client for UI preview and on server for API persistence) using correct OS principles:
-1. **First Come First Served (FCFS)**:
-   - Sort by arrival time.
-   - Non-preemptive execution.
-2. **Shortest Job First (SJF)**:
-   - Preemptive (SRTF) and Non-preemptive modes.
-   - Dynamically selects process with minimum remaining burst time at each execution step.
-3. **Priority Scheduling**:
-   - Preemptive and Non-preemptive modes.
-   - Higher priority processes scheduled first (1 can be Highest or Lowest, custom toggles will be supported).
-4. **Round Robin (RR)**:
-   - Uses a Ready Queue.
-   - Processes are allocated CPU for a specific Time Quantum.
-   - Handles newly arrived processes and re-enqueuing of running processes properly.
+Ensure you have **Node.js** and a local **MongoDB** service running.
 
-Each algorithm outputs:
-- **Gantt Chart Blocks** (Process ID, start time, end time).
-- **Process Metrics**: Completion Time ($C_T$), Turnaround Time ($T_{AT} = C_T - A_T$), Waiting Time ($W_T = T_{AT} - B_T$).
-- **Overall Statistics**: Average Waiting Time, Average Turnaround Time, CPU Utilization percentage.
+### 1. Perform Project Pruning
+Remove any initial configuration artifacts or temporary project folders:
+```powershell
+node cleanup.js
+```
+
+### 2. Configure Environment Variables
+Verify your root `.env` settings:
+```ini
+PORT=5000
+MONGODB_URI=mongodb://127.0.0.1:27017/powerplay
+JWT_SECRET=supercyberpunksecretkey123!@#
+NODE_ENV=development
+```
+
+### 3. Install All Dependencies
+Install the required packages across the root, client, and server workspaces in a single command:
+```powershell
+npm run install-all
+```
+
+### 4. Seed the Database
+Seed default visitors, mock bookings, activity logs, and the administrator account:
+```powershell
+npm run seed
+```
+
+### 5. Launch the Development Suite
+Run the concurrent task runner to boot both the Express server and Vite frontend concurrently:
+```powershell
+npm run dev
+```
 
 ---
 
-## Verification Plan
+## 🔑 Access Credentials
 
-### Automated/Unit Testing
-- Validate all four scheduling algorithms with traditional textbook examples (e.g., standard process tables) to verify correct calculations of waiting times, turnaround times, and Gantt charts.
-- Verify JWT creation, verification, and route protection.
+### 👥 Normal Visitor Access
+* You can sign up with any custom details directly on the **Visitor Enrollment** page.
+* Alternatively, log in using any standard user seeded database credentials.
 
-### Manual Verification
-- **Functional Testing**: Log in as a newly created user, make visual bookings in different departments, and see them simulated under various algorithms.
-- **Master Simulation Lab**: Customize a simulation with $5+$ processes of varying arrival times, burst times, and priorities, run FCFS, SJF, Priority, and Round Robin, and check calculations.
-- **Admin Verification**: Access `/powerplay-secret-admin`, verify users, delete database entries, and observe changes.
+### 🛡️ System Admin Access
+* **Route**: Access the hidden dashboard at `/powerplay-secret-admin`
+* **Email**: `admin@powerplay.com`
+* **Password**: `admin123`

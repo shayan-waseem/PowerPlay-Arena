@@ -33,9 +33,9 @@ const seedData = async () => {
     });
 
     const user1 = await User.create({
-      name: 'Alice Vance',
-      email: 'visitor@powerplay.com',
-      password: 'visitor123',
+      name: 'Shayan Visitor',
+      email: 'shayan@visitor.com',
+      password: 'shayan123',
       role: 'user',
     });
 
@@ -62,7 +62,7 @@ const seedData = async () => {
 
     console.log('Seeded Users:');
     console.log(`- Admin: ${admin.email} (password: admin123)`);
-    console.log(`- User: ${user1.email} (password: visitor123)`);
+    console.log(`- User: ${user1.email} (password: shayan123)`);
     console.log(`- User: ${user2.email} (password: visitor123)`);
     console.log(`- User: ${user3.email} (password: visitor123)`);
     console.log(`- User: ${user4.email} (password: visitor123)`);
@@ -180,7 +180,7 @@ const seedData = async () => {
     // 4. Seed system Audit logs
     const logData = [
       { userId: admin._id, action: 'ADMIN_INIT', details: 'Power Play Arena System Initialized', ipAddress: '127.0.0.1' },
-      { userId: user1._id, action: 'USER_SIGNUP', details: 'Visitor account created for Alice Vance', ipAddress: '127.0.0.1' },
+      { userId: user1._id, action: 'USER_SIGNUP', details: 'Visitor account created for Shayan Visitor', ipAddress: '127.0.0.1' },
       { userId: user2._id, action: 'USER_SIGNUP', details: 'Visitor account created for Bob Ross', ipAddress: '127.0.0.1' },
       { userId: user1._id, action: 'BOOKING_CREATE', details: 'Booking for gaming department created', ipAddress: '127.0.0.1' },
       { userId: admin._id, action: 'DATABASE_SEED', details: 'Database cleared and populated with seed dataset', ipAddress: '127.0.0.1' }

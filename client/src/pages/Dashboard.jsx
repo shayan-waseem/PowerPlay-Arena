@@ -1,10 +1,48 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { ArenaContext } from '../context/ArenaContext';
 import axios from 'axios';
-import { Ticket, Cpu, Zap, Gamepad2, Landmark, CheckCircle, Clock, Trash2, ArrowRight } from 'lucide-react';
+import { Ticket, Cpu, Zap, Gamepad2, Landmark, CheckCircle, Clock, Trash2, ArrowRight, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Card from '../components/ui/Card';
+import { motion } from 'framer-motion';
+
+// Premium Animated Counter Component
+const AnimatedCounter = ({ value, duration = 1 }) => {
+  const [count, setCount] = useState(0);
+  const isNumber = !isNaN(value) && !isNaN(parseFloat(value));
+
+  useEffect(() => {
+    if (!isNumber) {
+      setCount(value);
+      return;
+    }
+    
+    let start = 0;
+    const end = parseFloat(value);
+    if (end === 0) {
+      setCount(0);
+      return;
+    }
+    const stepTime = Math.max(Math.floor((duration * 1000) / 40), 15);
+    const increment = Math.ceil(end / 40);
+    
+    const timer = setInterval(() => {
+      start += increment;
+      if (start >= end) {
+        clearInterval(timer);
+        setCount(end);
+      } else {
+        setCount(start);
+      }
+    }, stepTime);
+    
+    return () => clearInterval(timer);
+  }, [value, duration, isNumber]);
+  
+  return <span className="font-mono">{count}</span>;
+};
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
@@ -111,62 +149,101 @@ const Dashboard = () => {
   const completedBookings = bookings.filter(b => b.status === 'completed').length;
   const pendingBookings = bookings.filter(b => b.status === 'pending').length;
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.08 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: 'spring', stiffness: 100, damping: 15 }
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-6 py-2 select-none">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="flex flex-col gap-6 py-2 select-none"
+    >
       
       {/* 1. WELCOME HERO WIDGET */}
-      <div className="glass-panel p-6 rounded-2xl border border-darkBorder/70 relative overflow-hidden flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+      <motion.div
+        variants={itemVariants}
+        className="glass-panel p-6 rounded-2xl border border-darkBorder/70 relative overflow-hidden flex flex-col sm:flex-row justify-between sm:items-center gap-4"
+      >
+        <div className="particle-field"></div>
         <div className="absolute top-0 right-0 w-32 h-32 bg-neonBlue/10 rounded-full blur-[70px] pointer-events-none"></div>
-        <div>
-          <span className="text-[9px] font-mono font-bold text-neonBlue bg-neonBlue/10 px-2 py-0.5 rounded border border-neonBlue/20 tracking-wider">SECURE VISITOR NODE</span>
-          <h2 className="font-display font-black text-lg text-white uppercase mt-2">
-            WELCOME BACK, {user?.name || 'VISITOR'}
+        <div className="relative z-10">
+          <span className="text-[9px] font-mono font-bold text-neonBlue bg-neonBlue/10 px-2.5 py-1 rounded-full border border-neonBlue/20 tracking-wider">
+            SECURE VISITOR NODE
+          </span>
+          <h2 className="font-display font-black text-xl text-white uppercase mt-3 tracking-wider">
+            WELCOME BACK, <span className="shimmer-text text-glow-blue">{user?.name || 'VISITOR'}</span>
           </h2>
-          <p className="text-xs text-gray-400 font-semibold mt-1">
+          <p className="text-xs text-gray-400 font-semibold mt-1 max-w-xl">
             Book play sessions in the departments and simulate scheduling queues in real-time.
           </p>
         </div>
 
-        <div className="flex gap-2">
-          <div className="px-4 py-2 bg-darkBg border border-darkBorder rounded-xl text-center min-w-[90px]">
-            <p className="text-[9px] font-mono text-gray-500 font-bold uppercase">LIVE VISITORS</p>
-            <p className="text-neonGreen font-mono font-bold mt-0.5 animate-pulse">{liveVisitors}</p>
+        <div className="flex gap-3 relative z-10">
+          <div className="px-4 py-2.5 bg-darkBg/90 border border-darkBorder rounded-xl text-center min-w-[100px] shadow-inner">
+            <p className="text-[8px] font-mono text-gray-500 font-bold uppercase tracking-wider">LIVE VISITORS</p>
+            <p className="text-neonGreen font-mono font-extrabold text-sm mt-1 text-glow-green">
+              <AnimatedCounter value={liveVisitors} />
+            </p>
           </div>
-          <div className="px-4 py-2 bg-darkBg border border-darkBorder rounded-xl text-center min-w-[90px]">
-            <p className="text-[9px] font-mono text-gray-500 font-bold uppercase">ACTIVE TICKETS</p>
-            <p className="text-neonPurple font-mono font-bold mt-0.5">{pendingBookings}</p>
+          <div className="px-4 py-2.5 bg-darkBg/90 border border-darkBorder rounded-xl text-center min-w-[100px] shadow-inner">
+            <p className="text-[8px] font-mono text-gray-500 font-bold uppercase tracking-wider">ACTIVE TICKETS</p>
+            <p className="text-neonPurple font-mono font-extrabold text-sm mt-1 text-glow-purple">
+              <AnimatedCounter value={pendingBookings} />
+            </p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* 2. STATS WIDGETS CAROUSEL */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { title: 'TOTAL SESSIONS BOOKED', value: totalBookings, icon: Ticket, color: 'text-neonBlue bg-neonBlue/10 border-neonBlue/20 shadow-glowBlue/5' },
-          { title: 'PENDING CPU QUEUES', value: pendingBookings, icon: Clock, color: 'text-neonPurple bg-neonPurple/10 border-neonPurple/20 shadow-glowPurple/5' },
-          { title: 'COMPLETED ACTIVITIES', value: completedBookings, icon: CheckCircle, color: 'text-neonGreen bg-neonGreen/10 border-neonGreen/20 shadow-glowGreen/5' },
-          { title: 'HARDWARE CPU CORES', value: '4 ACTIVE', icon: Cpu, color: 'text-neonPink bg-neonPink/10 border-neonPink/20 shadow-glowPink/5' }
+          { title: 'TOTAL SESSIONS BOOKED', value: totalBookings, icon: Ticket, color: 'text-neonBlue bg-neonBlue/5 border-neonBlue/20 shadow-glowBlue/5', glow: 'shadow-glowBlue/10' },
+          { title: 'PENDING CPU QUEUES', value: pendingBookings, icon: Clock, color: 'text-neonPurple bg-neonPurple/5 border-neonPurple/20 shadow-glowPurple/5', glow: 'shadow-glowPurple/10' },
+          { title: 'COMPLETED ACTIVITIES', value: completedBookings, icon: CheckCircle, color: 'text-neonGreen bg-neonGreen/5 border-neonGreen/20 shadow-glowGreen/5', glow: 'shadow-glowGreen/10' },
+          { title: 'HARDWARE CPU CORES', value: 4, labelSuffix: ' ACTIVE', icon: Cpu, color: 'text-neonPink bg-neonPink/5 border-neonPink/20 shadow-glowPink/5', glow: 'shadow-glowPink/10' }
         ].map((stat, idx) => {
           const Icon = stat.icon;
           return (
-            <div key={idx} className={`p-4 rounded-xl border flex flex-col gap-2 ${stat.color.split(' ')[1]} ${stat.color.split(' ')[2]}`}>
+            <motion.div
+              key={idx}
+              whileHover={{ y: -4, scale: 1.02 }}
+              className={`p-4 rounded-xl border flex flex-col gap-2 transition-all duration-300 ${stat.color.split(' ')[1]} ${stat.color.split(' ')[2]} hover:${stat.glow}`}
+            >
               <div className="flex justify-between items-center">
                 <span className="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-wider">{stat.title}</span>
                 <Icon className={`w-4 h-4 ${stat.color.split(' ')[0]}`} />
               </div>
-              <p className="font-display font-black text-sm text-white tracking-widest mt-1">{stat.value}</p>
-            </div>
+              <p className="font-display font-black text-sm text-white tracking-widest mt-1">
+                <AnimatedCounter value={stat.value} />
+                {stat.labelSuffix && <span className="text-[10px] font-mono text-neonPink font-bold">{stat.labelSuffix}</span>}
+              </p>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
 
       {/* 3. CORE TWO COLUMN SECTIONS */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
         
         {/* LEFT COLUMN: VISITOR BOOKINGS FORM */}
-        <div className="xl:col-span-1">
-          <Card className="flex flex-col gap-4 border border-darkBorder/60 bg-darkCard/35">
-            <h3 className="font-display font-black text-sm tracking-wider text-white pb-3 border-b border-darkBorder/40 flex items-center gap-2">
+        <motion.div variants={itemVariants} className="xl:col-span-1">
+          <Card className="flex flex-col gap-4 border border-darkBorder/60 bg-darkCard/35" tilt={true}>
+            <h3 className="font-display font-black text-xs tracking-wider text-white pb-3 border-b border-darkBorder/40 flex items-center gap-2">
               <Cpu className="w-4 h-4 text-neonBlue" />
               CREATE PLAY TICKET (PROCESS SUBMIT)
             </h3>
@@ -179,7 +256,7 @@ const Dashboard = () => {
                 <select
                   value={department}
                   onChange={(e) => { playClick(); setDepartment(e.target.value); }}
-                  className="w-full bg-darkBg border border-darkBorder rounded-lg p-2.5 text-xs text-white outline-none focus:border-neonPurple font-semibold"
+                  className="w-full bg-darkBg border border-darkBorder rounded-xl p-2.5 text-xs text-white outline-none focus:border-neonPurple font-semibold input-glow transition-all cursor-pointer"
                 >
                   <option value="reception">Reception Department</option>
                   <option value="kids">Kids Activity Department</option>
@@ -194,7 +271,7 @@ const Dashboard = () => {
                 <select
                   value={activity}
                   onChange={(e) => { playClick(); setActivity(e.target.value); }}
-                  className="w-full bg-darkBg border border-darkBorder rounded-lg p-2.5 text-xs text-white outline-none focus:border-neonPurple font-semibold"
+                  className="w-full bg-darkBg border border-darkBorder rounded-xl p-2.5 text-xs text-white outline-none focus:border-neonPurple font-semibold input-glow transition-all cursor-pointer"
                 >
                   {activitiesByDept[department].map((act, idx) => (
                     <option key={idx} value={act.name}>{act.name}</option>
@@ -212,7 +289,7 @@ const Dashboard = () => {
                     max="60"
                     value={sessionTime}
                     onChange={(e) => setSessionTime(Number(e.target.value))}
-                    className="w-full bg-darkBg border border-darkBorder rounded-lg p-2 text-xs font-mono text-white outline-none focus:border-neonPurple"
+                    className="w-full bg-darkBg border border-darkBorder rounded-xl p-2.5 text-xs font-mono text-white outline-none focus:border-neonPurple input-glow transition-all"
                   />
                 </div>
 
@@ -224,7 +301,7 @@ const Dashboard = () => {
                     max="5"
                     value={priority}
                     onChange={(e) => setPriority(Number(e.target.value))}
-                    className="w-full bg-darkBg border border-darkBorder rounded-lg p-2 text-xs font-mono text-white outline-none focus:border-neonPurple"
+                    className="w-full bg-darkBg border border-darkBorder rounded-xl p-2.5 text-xs font-mono text-white outline-none focus:border-neonPurple input-glow transition-all"
                     title="1 is Highest VIP priority, 5 is standard visitor"
                   />
                 </div>
@@ -236,7 +313,7 @@ const Dashboard = () => {
                 <select
                   value={algorithm}
                   onChange={(e) => { playClick(); setAlgorithm(e.target.value); }}
-                  className="w-full bg-darkBg border border-darkBorder rounded-lg p-2.5 text-xs text-white outline-none focus:border-neonPurple font-semibold"
+                  className="w-full bg-darkBg border border-darkBorder rounded-xl p-2.5 text-xs text-white outline-none focus:border-neonPurple font-semibold input-glow transition-all cursor-pointer"
                 >
                   <option value="FCFS">First-Come-First-Served (FCFS)</option>
                   <option value="SJF">Shortest Job First (SJF)</option>
@@ -245,24 +322,26 @@ const Dashboard = () => {
                 </select>
               </div>
 
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={formLoading}
-                className="w-full py-3 bg-gradient-to-r from-neonPurple to-neonBlue text-white font-bold font-display text-xs tracking-widest rounded-xl hover:opacity-95 shadow-glowBlue transition-all flex items-center justify-center gap-1.5 uppercase disabled:opacity-50 mt-2"
+                className="w-full py-3 bg-gradient-to-r from-neonPurple to-neonBlue text-white font-bold font-display text-[10px] tracking-widest rounded-xl shadow-glowBlue transition-all flex items-center justify-center gap-1.5 uppercase disabled:opacity-50 mt-2 btn-glow"
               >
                 {formLoading ? 'SCHEDULING TICKET...' : 'BOOK QUEUE ENTRANCE'}
                 <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+              </motion.button>
 
             </form>
           </Card>
-        </div>
+        </motion.div>
 
         {/* RIGHT COLUMN: BOOKINGS LIST (READY & TERMINATED PROCESSES) */}
-        <div className="xl:col-span-2">
+        <motion.div variants={itemVariants} className="xl:col-span-2">
           <Card className="flex flex-col gap-4 border border-darkBorder/60 bg-darkCard/35">
             <div className="flex justify-between items-center pb-3 border-b border-darkBorder/40">
-              <h3 className="font-display font-black text-sm tracking-wider text-white flex items-center gap-2">
+              <h3 className="font-display font-black text-xs tracking-wider text-white flex items-center gap-2">
                 <Ticket className="w-4 h-4 text-neonPurple" />
                 ACTIVE SCHEDULER TICKETS
               </h3>
@@ -285,15 +364,24 @@ const Dashboard = () => {
                 {bookings.map((booking) => {
                   const isPending = booking.status === 'pending';
                   const isCompleted = booking.status === 'completed';
+                  
+                  // Color codes for specific departments
+                  let deptColor = 'border-neonBlue text-neonBlue bg-neonBlue/5';
+                  if (booking.department === 'kids') deptColor = 'border-neonPurple text-neonPurple bg-neonPurple/5';
+                  if (booking.department === 'adult') deptColor = 'border-neonPink text-neonPink bg-neonPink/5';
+                  if (booking.department === 'gaming') deptColor = 'border-neonGreen text-neonGreen bg-neonGreen/5';
+
                   return (
-                    <div
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
                       key={booking._id}
-                      className="p-3 border border-darkBorder rounded-xl bg-darkBg/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:border-darkBorder"
+                      className="p-3 border border-darkBorder rounded-xl bg-darkBg/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:border-darkBorder/80 table-row-glow"
                     >
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
                           <span className="font-display font-bold text-xs text-white">{booking.activity}</span>
-                          <span className="text-[9px] font-mono font-bold text-gray-500 bg-darkBorder px-2 py-0.5 rounded border border-white/5 uppercase">
+                          <span className={`text-[8px] font-mono font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${deptColor}`}>
                             {booking.department}
                           </span>
                         </div>
@@ -306,31 +394,31 @@ const Dashboard = () => {
                       </div>
 
                       {/* Status badge */}
-                      <span className={`text-[9px] font-mono font-bold px-2 py-1 rounded border self-start sm:self-center tracking-widest uppercase ${
+                      <span className={`text-[8px] font-mono font-bold px-2 py-1 rounded border self-start sm:self-center tracking-widest uppercase badge-pulse ${
                         isCompleted
-                          ? 'border-neonGreen/30 text-neonGreen bg-neonGreen/5 shadow-inner shadow-glowGreen/5'
-                          : 'border-neonPurple/30 text-neonPurple bg-neonPurple/5 animate-pulse shadow-inner shadow-glowPurple/5'
+                          ? 'border-neonGreen/30 text-neonGreen bg-neonGreen/5'
+                          : 'border-neonPurple/30 text-neonPurple bg-neonPurple/5'
                       }`}>
                         {isCompleted ? 'TERMINATED' : 'READY QUEUE'}
                       </span>
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>
             )}
 
             {/* Quick redirect details */}
-            <div className="p-3 bg-neonBlue/5 border border-neonBlue/20 rounded-xl font-mono text-[9px] text-gray-400 leading-relaxed shadow-sm">
+            <div className="p-3.5 bg-neonBlue/5 border border-neonBlue/20 rounded-xl font-mono text-[9px] text-gray-400 leading-relaxed shadow-sm">
               <span className="text-neonBlue font-bold block uppercase tracking-wider mb-1">💡 QUEUE ALLOCATOR ACTION AVAILABLE:</span>
-              To visual execute these ready visitor queues, go to the corresponding department page (e.g. <Link to="/reception" className="text-neonPurple underline font-bold">Reception</Link>, <Link to="/gaming-zone" className="text-neonPurple underline font-bold">Gaming PC Zone</Link>) from the sidebar, choose the scheduling properties, and click <b className="text-white">Run Department Scheduler</b>!
+              To visually execute these ready visitor queues, go to the corresponding department page (e.g. <Link to="/reception" className="text-neonPurple underline font-bold hover:text-neonPurple/80">Reception</Link>, <Link to="/gaming-zone" className="text-neonPurple underline font-bold hover:text-neonPurple/80">Gaming PC Zone</Link>) from the sidebar, choose the scheduling properties, and click <b className="text-white">Run Department Scheduler</b>!
             </div>
 
           </Card>
-        </div>
+        </motion.div>
 
       </div>
 
-    </div>
+    </motion.div>
   );
 };
 
